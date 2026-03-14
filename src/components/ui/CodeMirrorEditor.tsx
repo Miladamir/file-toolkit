@@ -11,6 +11,10 @@ import { json } from "@codemirror/lang-json";
 import { css } from "@codemirror/lang-css";
 import { javascript } from "@codemirror/lang-javascript"; // Import JS
 import { useFileStore } from "@/store/editorStore";
+import { xml } from "@codemirror/lang-xml";
+import { yaml } from "@codemirror/lang-yaml";
+import { sql, StandardSQL } from "@codemirror/lang-sql";
+import { python } from "@codemirror/lang-python";
 
 const editorTheme = EditorView.theme({
     "&": { backgroundColor: "transparent !important", height: "100%" },
@@ -29,10 +33,15 @@ const languageMap: Record<string, any> = {
     json: json(),
     javascript: javascript(), // Add JS
     typescript: javascript({ typescript: true }),
+    xml: xml(),
+    yaml: yaml(),
+    csv: [],
+    sql: sql(),
+    python: python(),
 };
 
 interface Props {
-    language: "markdown" | "html" | "css" | "json" | "javascript" | "typescript"; // Update Type
+    language: "markdown" | "html" | "css" | "json" | "javascript" | "typescript" | "xml" | "yaml" | "csv" | "sql" | "python"; // Update Type
     placeholder?: string;
 }
 

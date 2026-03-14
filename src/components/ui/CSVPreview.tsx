@@ -2,54 +2,71 @@
 
 import { useFileStore } from "@/store/editorStore";
 import Papa from "papaparse";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 export default function CSVPreview() {
-    const { content } = useFileStore();
+    const { content, setContent } = useFileStore();
 
-    // Memoize parsing to avoid re-parsing on every render
+    // Parse data for rendering
     const data = useMemo(() => {
         if (!content) return [];
-        const result = Papa.parse<string[]>(content, {
-            skipEmptyLines: true,
-        });
-        return result.data;
+        const result = Papa.parse<string[]>(content, { skipEmptyLines: true });
+        return result.data as string[][];
     }, [content]);
 
-    if (!content) {
+    // Handle Cell Edit
+    const handleCellEdit = (rowIndex: number, colIndex: number, newValue: string) => {
+        const newData = [...data];
+        // Ensure row exists
+        if (!newData[rowIndex]) return;
+        // Ensure column exists
+        if (newData[rowIndex].length <= colIndex) {
+            // Extend columns if necessary (though table structure should match)
+            newData[rowIndex] = [...newData[rowIndex], ...Array(colIndex - newData[rowIndex].length + 1).fill("")];
+        }
+
+        newData[rowIndex][colIndex] = newValue;
+        setContent(Papa.unparse(newData));
+    };
+
+    if (!content || data.length === 0) {
         return (
-            <div className="h-full w-full flex items-center justify-center text-zinc-400 dark:text-zinc-600">
-                No CSV data to display
+            <div className="h-full w-full flex items-center justify-center text-[var(--fg-secondary)]">
+                Paste CSV to see grid view
             </div>
         );
     }
 
+    const maxCols = Math.max(...data.map(row => row.length), 1);
+
     return (
-        <div className="h-full w-full overflow-auto p-4 bg-white dark:bg-zinc-950">
-            <table className="min-w-full border-collapse text-sm">
-                <thead>
-                    <tr className="bg-zinc-100 dark:bg-zinc-800">
-                        {/* Render Header Row (assumes first row is header) */}
-                        {data[0]?.map((cell, index) => (
+        <div className="h-full w-full overflow-auto bg-[var(--bg-secondary)]">
+            <table className="w-full border-collapse text-sm">
+                <thead className="sticky top-0 z-10">
+                    <tr>
+                        {Array.from({ length: maxCols }).map((_, colIdx) => (
                             <th
-                                key={index}
-                                className="border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-left font-semibold text-zinc-700 dark:text-zinc-200"
+                                key={colIdx}
+                                className="bg-[var(--bg)] border-b border-r border-[var(--border)] px-4 py-2 text-left font-semibold text-[var(--fg)] min-w-[120px]"
                             >
-                                {cell}
+                                {colIdx + 1}
                             </th>
                         ))}
                     </tr>
                 </thead>
                 <tbody>
-                    {/* Render Body Rows (skipping header) */}
-                    {data.slice(1).map((row, rowIndex) => (
-                        <tr key={rowIndex} className="hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
-                            {row.map((cell, cellIndex) => (
+                    {data.map((row, rowIdx) => (
+                        <tr key={rowIdx} className="hover:bg-[var(--accent-light)]">
+                            {Array.from({ length: maxCols }).map((_, colIdx) => (
                                 <td
-                                    key={cellIndex}
-                                    className="border border-zinc-200 dark:border-zinc-700 px-3 py-2 text-zinc-600 dark:text-zinc-300"
+                                    key={colIdx}
+                                    contentEditable
+                                    suppressContentEditableWarning
+                                    onBlur={(e) => handleCellEdit(rowIdx, colIdx, e.currentTarget.textContent || "")}
+                                    className={`border-b border-r border-[var(--border)] px-4 py-2 min-w-[120px] text-[var(--fg)] ${rowIdx === 0 ? 'font-medium bg-[var(--bg-secondary)]' : 'bg-white dark:bg-transparent'
+                                        }`}
                                 >
-                                    {cell}
+                                    {row[colIdx] || ""}
                                 </td>
                             ))}
                         </tr>

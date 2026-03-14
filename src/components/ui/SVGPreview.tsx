@@ -1,30 +1,52 @@
 "use client";
 
-import { useFileStore } from "@/store/editorStore";
+import { useEffect, useState } from "react";
 
-export default function SVGPreview() {
-    const { content } = useFileStore();
+interface Props {
+    content: string;
+    background: "trans" | "white" | "dark";
+}
 
-    if (!content) {
-        return (
-            <div className="h-full w-full flex items-center justify-center text-zinc-400 dark:text-zinc-600">
-                No SVG content to display
-            </div>
-        );
-    }
+export default function SvgPreview({ content, background }: Props) {
+    const [srcDoc, setSrcDoc] = useState("");
 
-    // Security Note: rendering raw SVG can execute scripts if not sanitized.
-    // For a client-side tool, we rely on the browser's sandboxing.
-    // We use dangerouslySetInnerHTML to render the SVG tag from text.
+    useEffect(() => {
+        // We wrap the SVG in a flex container to center it
+        const html = `
+            <html>
+                <head>
+                    <style>
+                        html, body { margin: 0; height: 100%; display: flex; align-items: center; justify-content: center; }
+                        svg { max-width: 100%; max-height: 100%; }
+                    </style>
+                </head>
+                <body>${content}</body>
+            </html>
+        `;
+        setSrcDoc(html);
+    }, [content]);
+
+    // Dynamic classes for background
+    const bgClass = {
+        trans: "bg-[url('/checkerboard.svg')]", // We will simulate this with CSS gradient inline
+        white: "bg-white",
+        dark: "bg-zinc-800",
+    }[background];
+
+    // Inline style for checkerboard pattern to avoid external asset dependency
+    const checkerStyle = background === 'trans' ? {
+        backgroundImage: "linear-gradient(45deg, #e2e8f0 25%, transparent 25%), linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #e2e8f0 75%), linear-gradient(-45deg, transparent 75%, #e2e8f0 75%)",
+        backgroundSize: "20px 20px",
+        backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px"
+    } : {};
+
     return (
-        <div
-            className="h-full w-full overflow-auto p-4 bg-zinc-100 dark:bg-zinc-900 grid place-items-center"
-            // We add a checkerboard background to visualize transparency if the SVG has none
-            style={{ backgroundImage: "linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%)", backgroundSize: "20px 20px", backgroundPosition: "0 0, 0 10px, 10px -10px, -10px 0px" }}
-        >
-            <div
-                className="max-w-full max-h-full bg-white dark:bg-zinc-800 shadow-lg rounded-md overflow-hidden"
-                dangerouslySetInnerHTML={{ __html: content }}
+        <div className={`h-full w-full overflow-auto ${bgClass}`} style={checkerStyle}>
+            <iframe
+                srcDoc={srcDoc}
+                title="SVG Preview"
+                sandbox="allow-scripts"
+                className="w-full h-full border-none bg-transparent"
             />
         </div>
     );
