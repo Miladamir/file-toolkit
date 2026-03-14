@@ -9,13 +9,13 @@ import { useFileStore } from "@/store/editorStore";
 
 interface ToolPageLayoutProps {
     title: string;
-    filename: string; // The dynamic filename from the store (for display)
-    defaultFilename: string; // The hardcoded fallback name (for reset logic)
+    filename: string;
+    defaultFilename: string;
     extension: string;
     toolId: string;
     toolbarSlot?: ReactNode;
     editorSlot: ReactNode;
-    previewSlot: ReactNode;
+    previewSlot?: ReactNode; // Made optional
     seoContent: ReactNode;
     onCopy: () => void;
     onDownload: () => void;
@@ -24,20 +24,20 @@ interface ToolPageLayoutProps {
 }
 
 export default function ToolPageLayout({
-    title, filename, defaultFilename, extension, toolId, toolbarSlot, editorSlot, previewSlot, seoContent, onCopy, onDownload, extraActions, previewControls
+    title, filename, defaultFilename, extension, toolId,
+    toolbarSlot, editorSlot, previewSlot, seoContent,
+    onCopy, onDownload, extraActions, previewControls
 }: ToolPageLayoutProps) {
+
     const [mounted, setMounted] = useState(false);
     const { resolvedTheme, setTheme } = useTheme();
-    const [mobileTab, setMobileTab] = useState<"editor" | "preview">("editor");
+    const { setActiveTool } = useFileStore();
 
     const [layoutDirection, setLayoutDirection] = useState<"horizontal" | "vertical">("horizontal");
     const [fullscreenPane, setFullscreenPane] = useState<'none' | 'editor' | 'preview'>('none');
-
-    // --- Memory Reset Logic ---
-    const { setActiveTool } = useFileStore();
+    const [mobileTab, setMobileTab] = useState<"editor" | "preview">("editor");
 
     useEffect(() => {
-        // Use defaultFilename here, NOT the dynamic filename prop
         setActiveTool(toolId, defaultFilename, extension);
     }, [toolId, defaultFilename, extension, setActiveTool]);
 
@@ -49,6 +49,7 @@ export default function ToolPageLayout({
     const openFullscreen = (pane: 'editor' | 'preview') => setFullscreenPane(pane);
     const closeFullscreen = () => setFullscreenPane('none');
 
+    // --- Fullscreen Render ---
     if (fullscreenPane !== 'none') {
         return (
             <div className="fixed inset-0 z-50 bg-[var(--bg)] flex flex-col">
@@ -90,12 +91,15 @@ export default function ToolPageLayout({
             <div className="h-[75vh] min-h-[500px] flex flex-col overflow-hidden border-b border-[var(--border)]">
 
                 {/* Toolbar */}
-                <div className="toolbar flex-shrink-0">
+                <div className="toolbar flex-shrink-0 bg-[var(--toolbar-bg)]">
                     {toolbarSlot}
                     <div className="toolbar-group" style={{ border: "none", marginLeft: 'auto' }}>
-                        <button className="tool-btn" title="Switch Layout" onClick={toggleLayout}>
-                            {layoutDirection === 'horizontal' ? <Rows size={16} /> : <Columns size={16} />}
-                        </button>
+                        {/* Only show layout toggle if preview exists */}
+                        {previewSlot && (
+                            <button className="tool-btn" title="Switch Layout" onClick={toggleLayout}>
+                                {layoutDirection === 'horizontal' ? <Rows size={16} /> : <Columns size={16} />}
+                            </button>
+                        )}
                         {previewControls}
                         {mounted && (
                             <button onClick={toggleTheme} className="theme-toggle-editor">
@@ -107,44 +111,60 @@ export default function ToolPageLayout({
 
                 {/* Resizable Area */}
                 <div className="flex-1 overflow-hidden min-h-0">
+
+                    {/* Desktop View */}
                     <div className="hidden md:flex h-full">
-                        <Group orientation={layoutDirection}>
-                            <Panel defaultSize={50} minSize={20}>
-                                <div className="h-full w-full overflow-auto relative bg-[var(--editor-bg)] border-r border-[var(--border)]">
-                                    <button onClick={() => openFullscreen('editor')} className="absolute top-3 right-3 z-20 p-1.5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--border)] transition-colors" title="Fullscreen Editor">
-                                        <Maximize2 size={14} />
-                                    </button>
-                                    {editorSlot}
-                                </div>
-                            </Panel>
-
-                            <Separator />
-
-                            <Panel defaultSize={50} minSize={20}>
-                                <div className="h-full w-full overflow-auto relative bg-[var(--preview-bg)]">
-                                    <button onClick={() => openFullscreen('preview')} className="absolute top-3 right-3 z-20 p-1.5 rounded bg-white dark:bg-zinc-800 shadow-sm hover:opacity-80 transition-colors" title="Fullscreen Preview">
-                                        <Maximize2 size={14} />
-                                    </button>
-                                    {previewSlot}
-                                </div>
-                            </Panel>
-                        </Group>
+                        {previewSlot ? (
+                            // Split View
+                            <Group orientation="horizontal">
+                                <Panel defaultSize={50} minSize={20}>
+                                    <div className="h-full w-full overflow-auto relative bg-[var(--editor-bg)] border-r border-[var(--border)]">
+                                        <button onClick={() => openFullscreen('editor')} className="absolute top-3 right-3 z-20 p-1.5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--border)] transition-colors" title="Fullscreen Editor">
+                                            <Maximize2 size={14} />
+                                        </button>
+                                        {editorSlot}
+                                    </div>
+                                </Panel>
+                                <Separator />
+                                <Panel defaultSize={50} minSize={20}>
+                                    <div className="h-full w-full overflow-auto relative bg-[var(--preview-bg)]">
+                                        <button onClick={() => openFullscreen('preview')} className="absolute top-3 right-3 z-20 p-1.5 rounded bg-white dark:bg-zinc-800 shadow-sm hover:opacity-80 transition-colors" title="Fullscreen Preview">
+                                            <Maximize2 size={14} />
+                                        </button>
+                                        {previewSlot}
+                                    </div>
+                                </Panel>
+                            </Group>
+                        ) : (
+                            // Full Width Editor (No Preview)
+                            <div className="h-full w-full overflow-auto relative bg-[var(--editor-bg)]">
+                                <button onClick={() => openFullscreen('editor')} className="absolute top-3 right-3 z-20 p-1.5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--border)] transition-colors" title="Fullscreen Editor">
+                                    <Maximize2 size={14} />
+                                </button>
+                                {editorSlot}
+                            </div>
+                        )}
                     </div>
 
-                    {/* Mobile Tabs */}
+                    {/* Mobile View */}
                     <div className="md:hidden h-full relative">
                         <div className={`absolute inset-0 overflow-auto ${mobileTab === 'editor' ? 'z-10 bg-[var(--editor-bg)]' : 'hidden'}`}>
                             {editorSlot}
                         </div>
-                        <div className={`absolute inset-0 overflow-auto ${mobileTab === 'preview' ? 'z-10 bg-[var(--preview-bg)]' : 'hidden'}`}>
-                            {previewSlot}
-                        </div>
+                        {previewSlot && (
+                            <div className={`absolute inset-0 overflow-auto ${mobileTab === 'preview' ? 'z-10 bg-[var(--preview-bg)]' : 'hidden'}`}>
+                                {previewSlot}
+                            </div>
+                        )}
                     </div>
                 </div>
 
+                {/* Mobile Tabs UI */}
                 <div className="mobile-tabs md:hidden flex-shrink-0">
                     <button className={`tab-btn ${mobileTab === 'editor' ? 'active' : ''}`} onClick={() => setMobileTab('editor')}>Editor</button>
-                    <button className={`tab-btn ${mobileTab === 'preview' ? 'active' : ''}`} onClick={() => setMobileTab('preview')}>Preview</button>
+                    {previewSlot && (
+                        <button className={`tab-btn ${mobileTab === 'preview' ? 'active' : ''}`} onClick={() => setMobileTab('preview')}>Preview</button>
+                    )}
                 </div>
             </div>
 

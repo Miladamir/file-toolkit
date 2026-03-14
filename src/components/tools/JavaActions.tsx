@@ -2,9 +2,9 @@
 
 import { useFileStore } from "@/store/editorStore";
 import { toast } from "sonner";
-import { Plus, Box, Repeat, Code2, Wand2 } from "lucide-react";
+import { Code2, FileCode, Repeat, Braces } from "lucide-react";
 
-export default function PythonActions() {
+export default function JavaActions() {
     const { content, setContent } = useFileStore();
 
     const insert = (code: string) => {
@@ -16,19 +16,18 @@ export default function PythonActions() {
 
     return (
         <div className="flex items-center gap-3 h-full">
-            {/* Snippets */}
             <div className="flex items-center gap-2">
-                <button onClick={() => insert('print("Hello World")')} className={btnClass}>
-                    <Plus size={14} /> Print
+                <button onClick={() => insert('public class Main {\n    public static void main(String[] args) {\n        \n    }\n}')} className={btnClass}>
+                    <Code2 size={14} /> main
                 </button>
-                <button onClick={() => insert('def my_func(arg):\n    return arg\n')} className={btnClass}>
-                    <Box size={14} /> Def
+                <button onClick={() => insert('System.out.println("");')} className={btnClass}>
+                    <FileCode size={14} /> sysout
                 </button>
-                <button onClick={() => insert('for i in range(10):\n    print(i)\n')} className={btnClass}>
-                    <Repeat size={14} /> Loop
+                <button onClick={() => insert('Scanner sc = new Scanner(System.in);')} className={btnClass}>
+                    <Repeat size={14} /> Scanner
                 </button>
-                <button onClick={() => insert('class MyClass:\n    def __init__(self):\n        pass\n')} className={btnClass}>
-                    <Code2 size={14} /> Class
+                <button onClick={() => insert('class MyClass {\n    \n}')} className={btnClass}>
+                    <Braces size={14} /> class
                 </button>
             </div>
         </div>

@@ -1,9 +1,8 @@
 import {
     FileJson, Code2, FileText, Terminal, Palette, Database,
     FileSpreadsheet, FileCode, FileType, FileCog, Braces,
-    LucideIcon
+    LucideIcon, ScanLine, QrCode, Barcode, ShieldCheck
 } from "lucide-react";
-// Import the new component
 
 export type ToolConfig = {
     id: string;
@@ -17,11 +16,11 @@ export type ToolConfig = {
     previewType?: "html" | "markdown" | "csv" | "svg";
     hasActions?: boolean;
     isSpecialLayout?: boolean;
-    SpecialComponent?: React.ComponentType; // Add this to support special layouts
+    SpecialComponent?: React.ComponentType;
 };
 
 export const tools: ToolConfig[] = [
-    // Web
+    // --- Web ---
     {
         id: "html", name: "HTML Editor", description: "Edit and preview HTML code live.",
         extension: "html", language: "html", icon: Code2, category: "Web",
@@ -47,7 +46,7 @@ export const tools: ToolConfig[] = [
         hasPreview: true, previewType: "svg", hasActions: true
     },
 
-    // Data
+    // --- Data ---
     {
         id: "json", name: "JSON Formatter", description: "Format, validate, and minify JSON.",
         extension: "json", language: "json", icon: FileJson, category: "Data",
@@ -74,7 +73,7 @@ export const tools: ToolConfig[] = [
         hasActions: true
     },
 
-    // Code
+    // --- Code ---
     {
         id: "python", name: "Python Editor", description: "Write Python scripts with syntax highlighting.",
         extension: "py", language: "python", icon: Terminal, category: "Code",
@@ -101,24 +100,18 @@ export const tools: ToolConfig[] = [
         hasActions: true
     },
 
-    // Text
+    // --- Text ---
     {
-        id: "markdown",
-        name: "Markdown Editor",
-        description: "Write and preview Markdown documents.",
-        extension: "md",
-        language: "markdown",
-        icon: FileText,
-        category: "Text",
-        isSpecialLayout: false,
-        // Hook up the special component
+        id: "markdown", name: "Markdown Editor", description: "Write and preview Markdown documents.",
+        extension: "md", language: "markdown", icon: FileText, category: "Text",
+        hasPreview: true, previewType: "markdown"
     },
     {
-        id: "text", name: "Text Editor", description: "Simple plain text editor.",
+        id: "text", name: "Text Editor", description: "Simple plain text editor with stats.",
         extension: "txt", language: "plaintext", icon: FileType, category: "Text"
     },
 
-    // Utility
+    // --- Utility ---
     {
         id: "diff", name: "Diff Checker", description: "Compare two texts and find differences.",
         extension: "diff", language: "plaintext", icon: FileCode, category: "Utility",
@@ -134,6 +127,27 @@ export const tools: ToolConfig[] = [
         extension: "color", language: "plaintext", icon: Palette, category: "Utility",
         isSpecialLayout: true
     },
+    // New Generators
+    {
+        id: "qr-scanner", name: "QR Scanner", description: "Scan QR codes via camera or image.",
+        extension: "qr", language: "plaintext", icon: ScanLine, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "qr-generator", name: "QR Generator", description: "Create customizable QR codes.",
+        extension: "qr", language: "plaintext", icon: QrCode, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "barcode", name: "Barcode Generator", description: "Generate CODE128, EAN, UPC barcodes.",
+        extension: "barcode", language: "plaintext", icon: Barcode, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "password", name: "Password Generator", description: "Generate secure random passwords.",
+        extension: "pwd", language: "plaintext", icon: ShieldCheck, category: "Utility",
+        isSpecialLayout: true
+    }
 ];
 
 export function getToolById(id: string): ToolConfig | undefined {

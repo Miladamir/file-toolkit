@@ -2,9 +2,9 @@
 
 import { useFileStore } from "@/store/editorStore";
 import { toast } from "sonner";
-import { Plus, Box, Repeat, Code2, Wand2 } from "lucide-react";
+import { Code2, FileCode, Repeat, Braces } from "lucide-react";
 
-export default function PythonActions() {
+export default function PHPActions() {
     const { content, setContent } = useFileStore();
 
     const insert = (code: string) => {
@@ -18,17 +18,17 @@ export default function PythonActions() {
         <div className="flex items-center gap-3 h-full">
             {/* Snippets */}
             <div className="flex items-center gap-2">
-                <button onClick={() => insert('print("Hello World")')} className={btnClass}>
-                    <Plus size={14} /> Print
+                <button onClick={() => insert('<?php\n    \n?>')} className={btnClass}>
+                    <Code2 size={14} /> PHP Tag
                 </button>
-                <button onClick={() => insert('def my_func(arg):\n    return arg\n')} className={btnClass}>
-                    <Box size={14} /> Def
+                <button onClick={() => insert('echo "";')} className={btnClass}>
+                    <FileCode size={14} /> echo
                 </button>
-                <button onClick={() => insert('for i in range(10):\n    print(i)\n')} className={btnClass}>
-                    <Repeat size={14} /> Loop
+                <button onClick={() => insert('foreach ($arr as $item) {\n    \n}')} className={btnClass}>
+                    <Repeat size={14} /> foreach
                 </button>
-                <button onClick={() => insert('class MyClass:\n    def __init__(self):\n        pass\n')} className={btnClass}>
-                    <Code2 size={14} /> Class
+                <button onClick={() => insert('$arr = array();')} className={btnClass}>
+                    <Braces size={14} /> array
                 </button>
             </div>
         </div>
