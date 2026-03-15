@@ -1,7 +1,9 @@
 import {
     FileJson, Code2, FileText, Terminal, Palette, Database,
     FileSpreadsheet, FileCode, FileType, FileCog, Braces,
-    LucideIcon, ScanLine, QrCode, Barcode, ShieldCheck
+    LucideIcon, ScanLine, QrCode, Barcode, ShieldCheck,
+    // New Icons
+    Link, Key, Image, FileImage, Layers, FileKey2, Fingerprint
 } from "lucide-react";
 
 export type ToolConfig = {
@@ -127,7 +129,7 @@ export const tools: ToolConfig[] = [
         extension: "color", language: "plaintext", icon: Palette, category: "Utility",
         isSpecialLayout: true
     },
-    // New Generators
+    // Generators & Scanners
     {
         id: "qr-scanner", name: "QR Scanner", description: "Scan QR codes via camera or image.",
         extension: "qr", language: "plaintext", icon: ScanLine, category: "Utility",
@@ -146,6 +148,75 @@ export const tools: ToolConfig[] = [
     {
         id: "password", name: "Password Generator", description: "Generate secure random passwords.",
         extension: "pwd", language: "plaintext", icon: ShieldCheck, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "uuid", name: "UUID Generator", description: "Generate UUIDs and GUIDs.",
+        extension: "uuid", language: "plaintext", icon: Fingerprint, category: "Utility",
+        isSpecialLayout: true
+    },
+    // Encoders
+    {
+        id: "base64", name: "Base64 Encoder", description: "Encode and decode Base64 strings.",
+        extension: "b64", language: "plaintext", icon: FileCode, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "url-encoder", name: "URL Encoder", description: "Encode and decode URL components.",
+        extension: "url", language: "plaintext", icon: Link, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "html-entities", name: "HTML Entities", description: "Encode and decode HTML entities.",
+        extension: "html", language: "plaintext", icon: Code2, category: "Utility",
+        isSpecialLayout: true
+    },
+    // Security
+    {
+        id: "md5", name: "MD5 Generator", description: "Generate MD5 hash for text and files.",
+        extension: "md5", language: "plaintext", icon: FileKey2, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "sha256", name: "SHA-256 Generator", description: "Generate SHA-256 hash for data.",
+        extension: "sha256", language: "plaintext", icon: FileKey2, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "jwt", name: "JWT Decoder", description: "Decode and verify JSON Web Tokens.",
+        extension: "jwt", language: "plaintext", icon: Key, category: "Utility",
+        isSpecialLayout: true
+    },
+    // Image Tools
+    {
+        id: "image-compressor", name: "Image Compressor", description: "Compress and resize images.",
+        extension: "img", language: "plaintext", icon: Image, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "jpg-to-png", name: "JPG to PNG", description: "Convert JPG images to PNG format.",
+        extension: "png", language: "plaintext", icon: FileImage, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "png-to-jpg", name: "PNG to JPG", description: "Convert PNG images to JPG format.",
+        extension: "jpg", language: "plaintext", icon: FileImage, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "heic-to-jpg", name: "HEIC to JPG", description: "Convert iPhone HEIC photos to JPG.",
+        extension: "jpg", language: "plaintext", icon: FileImage, category: "Utility",
+        isSpecialLayout: true
+    },
+    // PDF Tools
+    {
+        id: "image-to-pdf", name: "Image to PDF", description: "Convert images to PDF format.",
+        extension: "pdf", language: "plaintext", icon: FileText, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "pdf-merge", name: "Merge PDF", description: "Combine multiple PDF files into one.",
+        extension: "pdf", language: "plaintext", icon: Layers, category: "Utility",
         isSpecialLayout: true
     }
 ];
