@@ -2,8 +2,10 @@ import {
     FileJson, Code2, FileText, Terminal, Palette, Database,
     FileSpreadsheet, FileCode, FileType, FileCog, Braces,
     LucideIcon, ScanLine, QrCode, Barcode, ShieldCheck,
-    // New Icons
-    Link, Key, Image, FileImage, Layers, FileKey2, Fingerprint
+    // Existing New Icons
+    Link, Key, Image, FileImage, Layers, FileKey2, Fingerprint,
+    // Added Icons for Phases 37-50
+    Sparkles, Split, Minimize2, FileSearch, Scale, Calendar, Activity, Clock, Type, Droplet, Square, Maximize2, Bot, Server
 } from "lucide-react";
 
 export type ToolConfig = {
@@ -217,6 +219,77 @@ export const tools: ToolConfig[] = [
     {
         id: "pdf-merge", name: "Merge PDF", description: "Combine multiple PDF files into one.",
         extension: "pdf", language: "plaintext", icon: Layers, category: "Utility",
+        isSpecialLayout: true
+    },
+    // New Tools (Phase 37-50)
+    {
+        id: "svg-optimizer", name: "SVG Optimizer", description: "Clean and minify SVG code.",
+        extension: "svg", language: "xml", icon: Sparkles, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "pdf-split", name: "Split PDF", description: "Extract pages from PDF files.",
+        extension: "pdf", language: "plaintext", icon: Split, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "pdf-compress", name: "Compress PDF", description: "Reduce PDF file size.",
+        extension: "pdf", language: "plaintext", icon: Minimize2, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "pdf-text-extractor", name: "PDF Text Extractor", description: "Extract text from PDF files.",
+        extension: "txt", language: "plaintext", icon: FileSearch, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "unit-converter", name: "Unit Converter", description: "Convert length, weight, and temperature.",
+        extension: "txt", language: "plaintext", icon: Scale, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "age-calculator", name: "Age Calculator", description: "Calculate exact age from date of birth.",
+        extension: "txt", language: "plaintext", icon: Calendar, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "bmi-calculator", name: "BMI Calculator", description: "Calculate Body Mass Index.",
+        extension: "txt", language: "plaintext", icon: Activity, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "timestamp", name: "Timestamp Converter", description: "Convert Unix timestamps to dates.",
+        extension: "txt", language: "plaintext", icon: Clock, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "roman-numeral", name: "Roman Numeral", description: "Convert numbers to Roman numerals.",
+        extension: "txt", language: "plaintext", icon: Type, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "css-gradient", name: "CSS Gradient", description: "Generate CSS gradient backgrounds.",
+        extension: "css", language: "css", icon: Droplet, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "box-shadow", name: "Box Shadow", description: "Generate CSS box shadows visually.",
+        extension: "css", language: "css", icon: Square, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "border-radius", name: "Border Radius", description: "Generate CSS border-radius values.",
+        extension: "css", language: "css", icon: Maximize2, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "robots-txt", name: "Robots.txt Generator", description: "Generate robots.txt files for SEO.",
+        extension: "txt", language: "plaintext", icon: Bot, category: "Utility",
+        isSpecialLayout: true
+    },
+    {
+        id: "htaccess", name: ".htaccess Generator", description: "Generate Apache .htaccess configurations.",
+        extension: "conf", language: "plaintext", icon: Server, category: "Utility",
         isSpecialLayout: true
     }
 ];
