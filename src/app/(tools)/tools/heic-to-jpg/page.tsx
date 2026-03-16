@@ -11,8 +11,8 @@ import {
     Minimize2,
     AlertCircle
 } from "lucide-react";
-// @ts-ignore - heic2any types are loose
-import heic2any from "heic2any";
+// REMOVED: Static import causing the error
+// import heic2any from "heic2any";
 
 export default function HeicToJpgPage() {
     const [originalFile, setOriginalFile] = useState<File | null>(null);
@@ -62,15 +62,17 @@ export default function HeicToJpgPage() {
         setError(null);
 
         try {
-            // heic2any does not support resizing directly.
-            // We convert to JPEG with the specified quality.
+            // FIX: Dynamic import to prevent "window is not defined" error during build
+            // @ts-ignore - heic2any types are loose
+            const heic2any = (await import("heic2any")).default;
+
             const resultBlob = await heic2any({
                 blob: originalFile,
                 toType: "image/jpeg",
                 quality: quality,
             });
 
-            // Handle potential array return (though unlikely without 'multiple: true')
+            // Handle potential array return
             const finalBlob = Array.isArray(resultBlob) ? resultBlob[0] : resultBlob;
 
             const url = URL.createObjectURL(finalBlob);
