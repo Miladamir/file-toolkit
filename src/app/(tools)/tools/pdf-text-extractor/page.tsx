@@ -4,7 +4,8 @@ import { useState, useRef, DragEvent } from "react";
 import ToolPageLayout from "@/components/layout/ToolPageLayout";
 import { toast } from "sonner";
 import { PDFDocument } from "pdf-lib";
-import * as pdfjsLib from "pdfjs-dist";
+// REMOVED: Static import causes the build error
+// import * as pdfjsLib from "pdfjs-dist";
 import {
     Upload,
     Download,
@@ -15,8 +16,13 @@ import {
     Image as ImageIcon
 } from "lucide-react";
 
-// Configure PDF.js Worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Helper to dynamically load PDF.js only on the client
+const getPdfJs = async () => {
+    const pdfjsLib = await import("pdfjs-dist");
+    // Configure Worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    return pdfjsLib;
+};
 
 interface CompressionSettings {
     dpi: number;
@@ -56,6 +62,9 @@ export default function PdfCompressPage() {
 
         // Render Preview
         try {
+            // Dynamically load library
+            const pdfjsLib = await getPdfJs();
+
             const arrayBuffer = await file.arrayBuffer();
             const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const page = await pdfDoc.getPage(1);
@@ -63,14 +72,13 @@ export default function PdfCompressPage() {
             const canvas = canvasRef.current;
             if (!canvas) return;
 
+            const ctx = canvas.getContext("2d");
+            if (!ctx) return;
+
             const viewport = page.getViewport({ scale: 1.5 });
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
-            const ctx = canvas.getContext("2d");
-            if (!ctx) return;
-
-            // FIX: Add 'canvas' property and ensure context is not null
             await page.render({
                 canvasContext: ctx,
                 viewport: viewport,
@@ -97,6 +105,9 @@ export default function PdfCompressPage() {
         setProgress(0);
 
         try {
+            // Dynamically load library
+            const pdfjsLib = await getPdfJs();
+
             const arrayBuffer = await file.arrayBuffer();
             const srcPdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const numPages = srcPdf.numPages;
@@ -114,13 +125,14 @@ export default function PdfCompressPage() {
                 const tCanvas = document.createElement("canvas");
                 const tCtx = tCanvas.getContext("2d");
 
-                // FIX: Handle null context
-                if (!tCtx) continue;
+                if (!tCtx) {
+                    console.error("Failed to get 2d context");
+                    continue;
+                }
 
                 tCanvas.height = viewport.height;
                 tCanvas.width = viewport.width;
 
-                // FIX: Add 'canvas' property
                 await page.render({
                     canvasContext: tCtx,
                     viewport: viewport,
@@ -152,7 +164,6 @@ export default function PdfCompressPage() {
                 saved: percent
             });
 
-            // FIX: Cast to BlobPart
             const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");

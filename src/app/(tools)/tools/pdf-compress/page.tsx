@@ -4,7 +4,8 @@ import { useState, useRef, DragEvent } from "react";
 import ToolPageLayout from "@/components/layout/ToolPageLayout";
 import { toast } from "sonner";
 import { PDFDocument } from "pdf-lib";
-import * as pdfjsLib from "pdfjs-dist";
+// REMOVED: Static import causing the build error
+// import * as pdfjsLib from "pdfjs-dist";
 import {
     Upload,
     Download,
@@ -15,8 +16,13 @@ import {
     Image as ImageIcon
 } from "lucide-react";
 
-// Configure PDF.js Worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+// Helper to dynamically load PDF.js only on the client
+const getPdfJs = async () => {
+    const pdfjsLib = await import("pdfjs-dist");
+    // Configure Worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    return pdfjsLib;
+};
 
 interface CompressionSettings {
     dpi: number;
@@ -56,6 +62,9 @@ export default function PdfCompressPage() {
 
         // Render Preview
         try {
+            // Dynamically load library
+            const pdfjsLib = await getPdfJs();
+
             const arrayBuffer = await file.arrayBuffer();
             const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const page = await pdfDoc.getPage(1);
@@ -70,7 +79,6 @@ export default function PdfCompressPage() {
             canvas.height = viewport.height;
             canvas.width = viewport.width;
 
-            // FIX 1: Add 'canvas' property to RenderParameters
             await page.render({
                 canvasContext: ctx,
                 viewport: viewport,
@@ -97,13 +105,15 @@ export default function PdfCompressPage() {
         setProgress(0);
 
         try {
+            // Dynamically load library
+            const pdfjsLib = await getPdfJs();
+
             const arrayBuffer = await file.arrayBuffer();
             const srcPdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
             const numPages = srcPdf.numPages;
 
             const pdfDoc = await PDFDocument.create();
 
-            // Scale factor based on DPI (72 is default PDF resolution)
             const scale = settings.dpi / 72;
 
             for (let i = 1; i <= numPages; i++) {
@@ -112,11 +122,9 @@ export default function PdfCompressPage() {
                 const page = await srcPdf.getPage(i);
                 const viewport = page.getViewport({ scale: scale });
 
-                // Create a temporary canvas to render the page
                 const tCanvas = document.createElement("canvas");
                 const tCtx = tCanvas.getContext("2d");
 
-                // FIX 2: Handle potential null context
                 if (!tCtx) {
                     console.error("Failed to get 2d context");
                     continue;
@@ -125,18 +133,15 @@ export default function PdfCompressPage() {
                 tCanvas.height = viewport.height;
                 tCanvas.width = viewport.width;
 
-                // FIX 1 (Applied here too): Add 'canvas' property
                 await page.render({
                     canvasContext: tCtx,
                     viewport: viewport,
                     canvas: tCanvas
                 }).promise;
 
-                // Convert canvas to JPEG
                 const imgDataUrl = tCanvas.toDataURL("image/jpeg", settings.quality);
                 const imgBytes = await fetch(imgDataUrl).then(res => res.arrayBuffer());
 
-                // Embed into pdf-lib
                 const img = await pdfDoc.embedJpg(imgBytes);
                 const newPage = pdfDoc.addPage([tCanvas.width, tCanvas.height]);
                 newPage.drawImage(img, {
@@ -149,7 +154,6 @@ export default function PdfCompressPage() {
 
             const pdfBytes = await pdfDoc.save();
 
-            // Update Stats
             const newSize = pdfBytes.length;
             const saved = file.size - newSize;
             const percent = file.size > 0 ? ((saved / file.size) * 100) : 0;
@@ -160,7 +164,6 @@ export default function PdfCompressPage() {
                 saved: percent
             });
 
-            // FIX 3: Cast Uint8Array to BlobPart to satisfy TypeScript strict types
             const blob = new Blob([pdfBytes as BlobPart], { type: "application/pdf" });
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
@@ -191,7 +194,6 @@ export default function PdfCompressPage() {
 
     const Controls = (
         <div className="flex flex-col gap-6 h-full overflow-auto p-6 bg-[var(--bg)]">
-            {/* DPI Slider */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-[var(--fg-secondary)] uppercase flex items-center gap-1"><ImageIcon size={12} /> Resolution (DPI)</label>
@@ -207,7 +209,6 @@ export default function PdfCompressPage() {
                 <p className="text-[10px] text-[var(--fg-secondary)]">Higher DPI = Better Quality, Larger File.</p>
             </div>
 
-            {/* Quality Slider */}
             <div className="space-y-2">
                 <div className="flex items-center justify-between">
                     <label className="text-xs font-bold text-[var(--fg-secondary)] uppercase flex items-center gap-1"><Sliders size={12} /> JPEG Quality</label>
@@ -223,7 +224,6 @@ export default function PdfCompressPage() {
                 <p className="text-[10px] text-[var(--fg-secondary)]">Lower Quality = Smaller File.</p>
             </div>
 
-            {/* Stats */}
             <div className="border-t border-[var(--border)] pt-4 space-y-2 mt-auto">
                 <div className="flex justify-between text-xs"><span className="text-[var(--fg-secondary)]">Original</span> <span className="font-mono">{formatBytes(stats.originalSize)}</span></div>
                 <div className="flex justify-between text-xs"><span className="text-[var(--fg-secondary)]">Compressed</span> <span className="font-mono text-green-600">{stats.compressedSize > 0 ? formatBytes(stats.compressedSize) : "-"}</span></div>
@@ -246,7 +246,6 @@ export default function PdfCompressPage() {
             </div>
 
             <div className="flex-1 relative overflow-auto flex items-center justify-center p-4">
-                {/* Drop Zone */}
                 {!file && (
                     <div
                         onClick={() => fileInputRef.current?.click()}
@@ -258,7 +257,6 @@ export default function PdfCompressPage() {
                     </div>
                 )}
 
-                {/* Canvas Preview */}
                 {file && (
                     <canvas ref={canvasRef} className="max-w-full max-h-full shadow-xl border border-[var(--border)]"></canvas>
                 )}
@@ -302,7 +300,6 @@ export default function PdfCompressPage() {
                     </>
                 )}
 
-                {/* Progress Bar Inside Button */}
                 {isProcessing && (
                     <div className="absolute bottom-0 left-0 h-1 bg-white/30 transition-all" style={{ width: `${progress}%` }}></div>
                 )}
